@@ -1,12 +1,24 @@
+const NONE = -1
+const UPDIR = 0
+const FOLDER = 2
+
+let currentDir = "D:/"
+let files = []
 let thumbnailsPerRow = 4
 let thumbnailsRatio = 200 / 320
 let textHeight = 22
 let fontSize = 16
 let backgroundColor = "gray"
 let thumbnailBorderColor = "white"
+let thumbnailBorderWidth = 2
 let thumbnailTextColor = "black"
 let thumbnailWidth = 1, thumbnailHeight = 1
 let imageHeight = 1
+let currentThumbnail = NONE
+
+function inBounds(value: number, min: number, max: number) {
+    return value >= min && value <= max
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     const electron = window["electron"]
@@ -21,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         ctx = canvas.getContext("2d")
         ctx.strokeStyle = thumbnailBorderColor
-        ctx.lineWidth = 1
+        ctx.lineWidth = thumbnailBorderWidth
         ctx.font = fontSize + "px sans-serif"
         ctx.textAlign = "center"
         ctx.textBaseline = "middle";
@@ -32,9 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    let files
+    window.addEventListener("resize", resizeCanvas);
 
     function step() {
         let col = 0
@@ -67,8 +77,30 @@ document.addEventListener("DOMContentLoaded", () => {
         requestAnimationFrame(step)
     }
 
-    electron.getDir("D:/").then((currentFiles: string[]) => {
-        files = currentFiles
+    function refreshThumbnails() {
+        files = electron.getDir(currentDir)
+        files.unshift({name: ".."})
         step()
+    }
+
+    refreshThumbnails()
+
+    canvas.addEventListener("mousemove", (event) => {
+        const thumbnailNumber = Math.floor(event.x / thumbnailWidth)
+            + Math.floor(event.y / thumbnailHeight) * thumbnailsPerRow
+        currentThumbnail = inBounds(thumbnailNumber, 0, files.length) ? thumbnailNumber : NONE
+    });
+
+    canvas.addEventListener("dblclick", (event) => {
+        if(currentThumbnail === NONE) return
+
+        if(currentThumbnail === UPDIR) {
+            currentDir = currentDir.substring(0, currentDir.lastIndexOf("/"))
+        } else {
+            const file = files[currentThumbnail]
+            if(!file.isDirectory) return
+            currentDir += `/${file.name}`
+        }
+        refreshThumbnails()
     })
 })

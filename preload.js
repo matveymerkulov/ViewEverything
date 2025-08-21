@@ -7,6 +7,14 @@ const path = require('path')
 
 contextBridge.exposeInMainWorld('electron', {
     getDir(dir) {
-        return fs.promises.readdir(dir, {withFileTypes: true})
+        const files = fs.readdirSync(dir, {withFileTypes: true})
+        const newFiles = []
+        for(const file of files) {
+            newFiles.push({
+                name: file.name,
+                isDirectory: file.isDirectory(),
+            })
+        }
+        return newFiles
     }
 })
