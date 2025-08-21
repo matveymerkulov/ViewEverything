@@ -58,6 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshThumbnails()
     }
 
+    let processingThumbnailNumber = 0
+
     function step() {
         let col = 0
         let y = -screenY
@@ -73,8 +75,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 const scale = Math.min((thumbnailWidth - 3) / img.width, (imageHeight - 3) / img.height)
                 const imgWidth = scale * img.width
                 const imgHeight = scale * img.height
-                ctx.drawImage(img, x + 1 + 0.5 * (thumbnailWidth - imgWidth)
-                    , y + 1 + 0.5 * (imageHeight - imgHeight), imgWidth, imgHeight)
+                try {
+                    ctx.drawImage(img, x + 1 + 0.5 * (thumbnailWidth - imgWidth)
+                        , y + 1 + 0.5 * (imageHeight - imgHeight), imgWidth, imgHeight)
+                } catch (e) {
+                    console.error(e)
+                }
             }
 
             ctx.strokeRect(x + 1, y + 1, thumbnailWidth - 3, thumbnailHeight - 3)
@@ -97,17 +103,30 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         ctx.stroke()
+
+        if(processingThumbnailNumber < files.length) {
+            const file = files[processingThumbnailNumber]
+            if(!file.isDirectory) {
+                file.thumbnail = decode(`${currentDir}/${file.name}`)
+            }
+            processingThumbnailNumber++
+        }
+
         requestAnimationFrame(step)
     }
 
     function refreshThumbnails() {
         files = electron.getDir(currentDir)
-        files.unshift({name: "..", thumbnail: parentFolderImage})
+        if(currentDir.length > 3) {
+            files.unshift({name: "..", thumbnail: parentFolderImage, isDirectory: true})
+        }
 
         screenY = 0
         maxScreenY = Math.ceil(Math.ceil(files.length / thumbnailsPerRow)
             - canvas.height / thumbnailHeight) * thumbnailHeight
         if(maxScreenY < 0) maxScreenY = 0
+
+        processingThumbnailNumber = 0
 
         step()
     }
@@ -133,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const fileName = file.name
         if(fileName === "..") {
             currentDir = currentDir.substring(0, currentDir.lastIndexOf("/"))
+            if(currentDir.length <= 2) currentDir += "/"
         } else {
             if(!file.isDirectory) {
                 file.thumbnail = decode(`${currentDir}/${fileName}`)
