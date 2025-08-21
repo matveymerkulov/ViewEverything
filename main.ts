@@ -1,4 +1,3 @@
-let contents: string[]
 let thumbnailsPerRow = 4
 let thumbnailsRatio = 200 / 320
 let textHeight = 22
@@ -6,6 +5,8 @@ let fontSize = 16
 let backgroundColor = "gray"
 let thumbnailBorderColor = "white"
 let thumbnailTextColor = "black"
+let thumbnailWidth = 1, thumbnailHeight = 1
+let imageHeight = 1
 
 document.addEventListener("DOMContentLoaded", () => {
     const electron = window["electron"]
@@ -17,12 +18,17 @@ document.addEventListener("DOMContentLoaded", () => {
         //canvas.style.height = document.body.offsetHeight + 'px';
         canvas.width = document.body.offsetWidth;
         canvas.height = document.body.offsetHeight;
+
         ctx = canvas.getContext("2d")
         ctx.strokeStyle = thumbnailBorderColor
         ctx.lineWidth = 1
         ctx.font = fontSize + "px sans-serif"
         ctx.textAlign = "center"
         ctx.textBaseline = "middle";
+
+        thumbnailWidth = document.body.clientWidth / thumbnailsPerRow
+        imageHeight = thumbnailWidth * thumbnailsRatio
+        thumbnailHeight = imageHeight + textHeight + 2
     }
 
     resizeCanvas();
@@ -31,9 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let files
 
     function step() {
-        const thumbnailWidth = document.body.clientWidth / thumbnailsPerRow
-        const imageHeight = thumbnailWidth * thumbnailsRatio
-        const thumbnailHeight = imageHeight + textHeight + 2
         let col = 0
         let y = 0
         ctx.fillStyle = backgroundColor
@@ -45,8 +48,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             ctx.fillStyle = thumbnailBorderColor
             ctx.fillRect(x + 1, y + imageHeight + 1, thumbnailWidth - 3, textHeight)
+
+            let text = files[n].name
             ctx.fillStyle = thumbnailTextColor
-            ctx.fillText(files[n].name, x + 0.5 * thumbnailWidth, y + imageHeight + 0.5 * textHeight, thumbnailWidth - 6)
+            while(true) {
+                if(ctx.measureText(text).width <= thumbnailWidth || text.length <= 3) break
+                text = text.substring(0, text.length - 4) + "..."
+            }
+            ctx.fillText(text, x + 0.5 * thumbnailWidth, y + imageHeight + 0.5 * textHeight, thumbnailWidth - 6)
 
             col++
             if(col === thumbnailsPerRow) {
