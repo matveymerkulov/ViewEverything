@@ -64,7 +64,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const img = file.isDirectory ? folderImage : file.thumbnail
             if(img !== undefined) {
-                ctx.drawImage(img, x + 1, y + 1, thumbnailWidth - 3, thumbnailHeight - 3)
+                const scale = Math.min((thumbnailWidth - 3) / img.width, (imageHeight - 3) / img.height)
+                const imgWidth = scale * img.width
+                const imgHeight = scale * img.height
+                ctx.drawImage(img, x + 1 + 0.5 * (thumbnailWidth - imgWidth)
+                    , y + 1 + 0.5 * (imageHeight - imgHeight), imgWidth, imgHeight)
             }
 
             ctx.strokeRect(x + 1, y + 1, thumbnailWidth - 3, thumbnailHeight - 3)
@@ -104,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentThumbnail = inBounds(thumbnailNumber, 0, files.length) ? thumbnailNumber : NONE
     });
 
-    canvas.addEventListener("dblclick", (event) => {
+    canvas.addEventListener("dblclick", () => {
         if(currentThumbnail === NONE) return
 
         const file = files[currentThumbnail]
