@@ -1,8 +1,11 @@
+import {decode} from "./decoder.js";
+
+export const electron = window["electron"]
+
 const NONE = -1
 const UPDIR = 0
-const FOLDER = 2
 
-let currentDir = "D:/"
+let currentDir = "D:/sync/content"
 let files = []
 let thumbnailsPerRow = 4
 let thumbnailsRatio = 200 / 320
@@ -21,7 +24,6 @@ function inBounds(value: number, min: number, max: number) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const electron = window["electron"]
     const canvas = document.getElementById("canvas") as HTMLCanvasElement
     let ctx: CanvasRenderingContext2D
 
@@ -98,7 +100,10 @@ document.addEventListener("DOMContentLoaded", () => {
             currentDir = currentDir.substring(0, currentDir.lastIndexOf("/"))
         } else {
             const file = files[currentThumbnail]
-            if(!file.isDirectory) return
+            if(!file.isDirectory) {
+                decode(`${currentDir}/${file.name}`)
+                return
+            }
             currentDir += `/${file.name}`
         }
         refreshThumbnails()

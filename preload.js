@@ -16,5 +16,9 @@ contextBridge.exposeInMainWorld('electron', {
             })
         }
         return newFiles
+    },
+
+    getData(fileName) {
+        return fs.readFileSync(fileName)
     }
 })

@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
     "target": "es2019",
-    "outFile": "D:/electron/ViewEverything/main.js",
-    "sourceMap": true,
+    "moduleResolution": "NodeNext",
+    // or "Bundler"
+    "include": "*",
+    "outDir": "D:/electron/ViewEverything/",
+    "sourceMap": true
   }
 }
