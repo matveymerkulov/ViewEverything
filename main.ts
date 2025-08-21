@@ -6,6 +6,7 @@ const NONE = -1
 
 let currentDir = "D:/sync/content"
 let files = []
+
 let thumbnailsPerRow = 4
 let thumbnailsRatio = 200 / 320
 let textHeight = 22
@@ -20,8 +21,14 @@ let currentThumbnail = NONE
 let folderImage: HTMLImageElement
 let parentFolderImage: HTMLImageElement
 
+let screenY = 0, maxScreenY = 0, scrollAmount = 50
+
 function inBounds(value: number, min: number, max: number) {
     return value >= min && value <= max
+}
+
+function limit(value: number, min: number, max: number) {
+    return value < min ? min : (value > max ? max : value)
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -47,14 +54,13 @@ document.addEventListener("DOMContentLoaded", () => {
         thumbnailWidth = document.body.clientWidth / thumbnailsPerRow
         imageHeight = thumbnailWidth * thumbnailsRatio
         thumbnailHeight = imageHeight + textHeight + 2
-    }
 
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+        refreshThumbnails()
+    }
 
     function step() {
         let col = 0
-        let y = 0
+        let y = -screenY
         ctx.fillStyle = backgroundColor
         ctx.fillRect(0, 0, document.body.clientWidth, document.body.clientHeight)
         ctx.beginPath()
@@ -97,16 +103,27 @@ document.addEventListener("DOMContentLoaded", () => {
     function refreshThumbnails() {
         files = electron.getDir(currentDir)
         files.unshift({name: "..", thumbnail: parentFolderImage})
+
+        screenY = 0
+        maxScreenY = Math.floor(Math.ceil(files.length / thumbnailsPerRow) - canvas.height / thumbnailHeight) * thumbnailHeight
+        if(maxScreenY < 0) maxScreenY = 0
+
         step()
     }
 
-    refreshThumbnails()
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 
     canvas.addEventListener("mousemove", (event) => {
         const thumbnailNumber = Math.floor(event.x / thumbnailWidth)
             + Math.floor(event.y / thumbnailHeight) * thumbnailsPerRow
         currentThumbnail = inBounds(thumbnailNumber, 0, files.length) ? thumbnailNumber : NONE
     });
+
+    canvas.addEventListener("wheel", (event) => {
+        screenY += event.deltaY / 100 * scrollAmount
+        screenY = limit(screenY, 0, maxScreenY)
+    })
 
     canvas.addEventListener("dblclick", () => {
         if(currentThumbnail === NONE) return

@@ -5,15 +5,20 @@ export let formats: any = [
 
         paletteStart: 0,
         paletteMultiplier: 4,
-        paletteBytesPerColor: 1,
+    }, {
+        name: "Another World Memory VGA palette",
+        fileSize: 1024,
+
+        paletteStart: 0,
+        paletteMultiplier: 4,
+        paletteBytesPerColor: 4,
     }, {
         name: "Alternate Logic Puzzles VGA palette",
         fileSize: 1536,
 
         paletteStart: 0,
         paletteMultiplier: 4,
-        paletteBytesPerColor: 2,
-        colorLayersFirst: true,
+        paletteBytesPerChannel: 2,
     }, {
         name: "QBasic BSAVE VGA fullscreen image",
         type: "QBasic Binary",
@@ -35,7 +40,6 @@ export let formats: any = [
 
         paletteStart: 64007,
         paletteMultiplier: 4,
-        paletteBytesPerColor: 1,
     }, {
         name: "QBasic BSAVE VGA image",
         type: "QBasic Binary",

@@ -19,14 +19,15 @@ export function decode(fileName: string) {
         if(paletteStart !== undefined) {
             currentPalette = []
             const mul = format.paletteMultiplier ?? 1
-            const indexMul = format.paletteBytesPerColor ?? 1
+            const indexMul = format.paletteBytesPerChannel ?? 1
+            const colorMul = format.paletteBytesPerColor ?? 3
 
-            if(paletteStart + indexMul * 256 * 3 > dataLength) continue
+            if(paletteStart + indexMul * 256 * colorMul > dataLength) continue
 
             for (let colIndex = 0; colIndex < 256; colIndex++) {
                 currentPalette[colIndex] = []
                 for (let colorLayer = 0; colorLayer < 3; colorLayer++) {
-                    const i = (colorLayer + colIndex * 3) * indexMul
+                    const i = (colorLayer + colIndex * colorMul) * indexMul
                     currentPalette[colIndex][colorLayer] = data[i] * mul
                 }
             }
@@ -51,7 +52,22 @@ export function decode(fileName: string) {
         }
 
         if(width === undefined || height === undefined) {
-            if(paletteStart !== undefined) return
+            if(paletteStart !== undefined) {
+                const canvas = document.createElement("canvas")
+                canvas.width = 256
+                canvas.height = 256
+                const ctx = canvas.getContext("2d")
+
+                for (let y = 0; y < 16; y++) {
+                    for (let x = 0; x < 16; x++) {
+                        let color = currentPalette[x + 16 * y]
+                        ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+                        ctx.fillRect(x * 16, y * 16, 16, 16)
+                    }
+                }
+
+                return canvas
+            }
             continue
         }
 
