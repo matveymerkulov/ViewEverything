@@ -3,7 +3,6 @@ import {decode} from "./decoder.js";
 export const electron = window["electron"]
 
 const NONE = -1
-const UPDIR = 0
 
 let currentDir = "D:/sync/content"
 let files = []
@@ -55,13 +54,20 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.fillRect(0, 0, document.body.clientWidth, document.body.clientHeight)
         ctx.beginPath()
         for(let n = 0; n < files.length; n++) {
+            const file = files[n]
             const x = col * thumbnailWidth
+
+            const img = file.thumbnail
+            if(img !== undefined) {
+                ctx.drawImage(img, x + 1, y + 1, thumbnailWidth - 3, thumbnailHeight - 3)
+            }
+
             ctx.strokeRect(x + 1, y + 1, thumbnailWidth - 3, thumbnailHeight - 3)
 
             ctx.fillStyle = thumbnailBorderColor
             ctx.fillRect(x + 1, y + imageHeight + 1, thumbnailWidth - 3, textHeight)
 
-            let text = files[n].name
+            let text = file.name
             ctx.fillStyle = thumbnailTextColor
             while(true) {
                 if(ctx.measureText(text).width <= thumbnailWidth || text.length <= 3) break
@@ -96,12 +102,13 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.addEventListener("dblclick", (event) => {
         if(currentThumbnail === NONE) return
 
-        if(currentThumbnail === UPDIR) {
+        const file = files[currentThumbnail]
+        const fileName = file.name
+        if(fileName === "..") {
             currentDir = currentDir.substring(0, currentDir.lastIndexOf("/"))
         } else {
-            const file = files[currentThumbnail]
             if(!file.isDirectory) {
-                decode(`${currentDir}/${file.name}`)
+                file.thumbnail = decode(`${currentDir}/${fileName}`)
                 return
             }
             currentDir += `/${file.name}`
