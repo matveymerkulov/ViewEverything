@@ -4,8 +4,8 @@ export const electron = window["electron"]
 
 const NONE = -1
 
-let currentDir = "D:/sync/content"
-let files = []
+export let currentDir = "D:/sync/content"
+export let files = []
 
 let thumbnailsPerRow = 4
 let thumbnailsRatio = 200 / 320
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(processingThumbnailNumber < files.length) {
             const file = files[processingThumbnailNumber]
             if(!file.isDirectory) {
-                file.thumbnail = decode(`${currentDir}/${file.name}`)
+                file.thumbnail = decode(file.name)
             }
             processingThumbnailNumber++
         }
@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if(currentDir.length <= 2) currentDir += "/"
         } else {
             if(!file.isDirectory) {
-                file.thumbnail = decode(`${currentDir}/${fileName}`, true)
+                file.thumbnail = decode(fileName, true)
                 return
             }
             currentDir += `/${file.name}`
