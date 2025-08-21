@@ -1,3 +1,11 @@
+export enum fileType {
+    binary,
+    text,
+    englishText,
+    numbers,
+}
+
+
 export let formats: any = [
     {
         name: "Binary VGA palette",
@@ -20,8 +28,22 @@ export let formats: any = [
         paletteMultiplier: 4,
         paletteBytesPerChannel: 2,
     }, {
+        name: "Assault VGA palette",
+        fileSize: 771,
+
+        paletteStart: 0,
+        paletteMultiplier: 4,
+    }, {
+        name: "Digital VGA palette",
+        type: "numbers",
+        paletteStart: 0,
+    },
+
+
+
+
+    {
         name: "QBasic BSAVE VGA fullscreen image",
-        type: "QBasic Binary",
         fileSize: 64007,
 
         imageStart: 7,
@@ -30,7 +52,6 @@ export let formats: any = [
         bitsPerPixel: 8,
     }, {
         name: "QBasic BSAVE VGA fullscreen image with palette",
-        type: "QBasic Binary",
         fileSize: 64775,
 
         imageStart: 7,
@@ -42,7 +63,6 @@ export let formats: any = [
         paletteMultiplier: 4,
     }, {
         name: "QBasic BSAVE VGA image",
-        type: "QBasic Binary",
 
         imageStart: 11,
         widthIndex: 7,

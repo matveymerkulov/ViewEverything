@@ -105,7 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
         files.unshift({name: "..", thumbnail: parentFolderImage})
 
         screenY = 0
-        maxScreenY = Math.floor(Math.ceil(files.length / thumbnailsPerRow) - canvas.height / thumbnailHeight) * thumbnailHeight
+        maxScreenY = Math.ceil(Math.ceil(files.length / thumbnailsPerRow)
+            - canvas.height / thumbnailHeight) * thumbnailHeight
         if(maxScreenY < 0) maxScreenY = 0
 
         step()
@@ -116,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     canvas.addEventListener("mousemove", (event) => {
         const thumbnailNumber = Math.floor(event.x / thumbnailWidth)
-            + Math.floor(event.y / thumbnailHeight) * thumbnailsPerRow
+            + Math.floor((event.y + screenY) / thumbnailHeight) * thumbnailsPerRow
         currentThumbnail = inBounds(thumbnailNumber, 0, files.length) ? thumbnailNumber : NONE
     });
 
