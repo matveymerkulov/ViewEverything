@@ -17,12 +17,17 @@ let thumbnailTextColor = "black"
 let thumbnailWidth = 1, thumbnailHeight = 1
 let imageHeight = 1
 let currentThumbnail = NONE
+let folderImage: HTMLImageElement
+let parentFolderImage: HTMLImageElement
 
 function inBounds(value: number, min: number, max: number) {
     return value >= min && value <= max
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    folderImage = document.getElementById("folder_image") as HTMLImageElement
+    parentFolderImage = document.getElementById("parent_folder_image") as HTMLImageElement
+
     const canvas = document.getElementById("canvas") as HTMLCanvasElement
     let ctx: CanvasRenderingContext2D
 
@@ -57,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const file = files[n]
             const x = col * thumbnailWidth
 
-            const img = file.thumbnail
+            const img = file.isDirectory ? folderImage : file.thumbnail
             if(img !== undefined) {
                 ctx.drawImage(img, x + 1, y + 1, thumbnailWidth - 3, thumbnailHeight - 3)
             }
@@ -87,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function refreshThumbnails() {
         files = electron.getDir(currentDir)
-        files.unshift({name: ".."})
+        files.unshift({name: "..", thumbnail: parentFolderImage})
         step()
     }
 
