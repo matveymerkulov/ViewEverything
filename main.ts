@@ -126,8 +126,6 @@ document.addEventListener("DOMContentLoaded", () => {
             - canvas.height / thumbnailHeight) * thumbnailHeight
         if(maxScreenY < 0) maxScreenY = 0
 
-        processingThumbnailNumber = 0
-
         step()
     }
 
@@ -155,11 +153,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if(currentDir.length <= 2) currentDir += "/"
         } else {
             if(!file.isDirectory) {
-                file.thumbnail = decode(`${currentDir}/${fileName}`)
+                file.thumbnail = decode(`${currentDir}/${fileName}`, true)
                 return
             }
             currentDir += `/${file.name}`
         }
+
+        processingThumbnailNumber = 0
         refreshThumbnails()
     })
 })

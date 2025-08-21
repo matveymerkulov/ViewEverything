@@ -7,7 +7,7 @@ function isDigit(num: number) {
     return (num >= 48 && num <= 57) || num === 46
 }
 
-export function decode(fileName: string) {
+export function decode(fileName: string, usePalette = false) {
     const byteArray: Uint8Array = electron.getData(fileName)
 
     let numbers = true, text = true, englishText = true
@@ -65,26 +65,28 @@ export function decode(fileName: string) {
         if(format.type === "text" && !text) continue
         if(format.type === "english_text" && !englishText) continue
 
+        let palette: number[][] = currentPalette
+
         const paletteStart = format.paletteStart
         if(paletteStart !== undefined) {
             const mul = format.paletteMultiplier ?? 1
             const indexMul = format.paletteBytesPerChannel ?? 1
             const colorMul = format.paletteBytesPerColor ?? 3
 
+            palette = []
             if(paletteStart + indexMul * 256 * colorMul > dataLength) continue
 
-            currentPalette = []
             for (let colIndex = 0; colIndex < 256; colIndex++) {
-                currentPalette[colIndex] = []
+                palette[colIndex] = []
                 for (let colorLayer = 0; colorLayer < 3; colorLayer++) {
                     const i = paletteStart + (colorLayer + colIndex * colorMul) * indexMul
-                    currentPalette[colIndex][colorLayer] = data[i] * mul
+                    palette[colIndex][colorLayer] = data[i] * mul
                 }
             }
+
+            if(usePalette) currentPalette = palette
+
             console.log(format.name)
-        } else if(currentPalette === undefined) {
-            console.log("no palette")
-            return
         }
 
         let width = format.width
@@ -93,7 +95,11 @@ export function decode(fileName: string) {
         const widthIndex = format.widthIndex
         if(widthIndex !== undefined) {
             if(widthIndex > dataLength - 2) continue
-            width = getInt(widthIndex) / 8
+            width = getInt(widthIndex)
+            if(format.divideWidthBy8) {
+                if(width % 8 !== 0) continue
+                width /= 8
+            }
         }
         const heightIndex = format.heightIndex
         if(heightIndex !== undefined) {
@@ -110,7 +116,7 @@ export function decode(fileName: string) {
 
                 for (let y = 0; y < 16; y++) {
                     for (let x = 0; x < 16; x++) {
-                        let color = currentPalette[x + 16 * y]
+                        let color = palette[x + 16 * y]
                         ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
                         ctx.fillRect(x * 16, y * 16, 16, 16)
                     }
@@ -131,7 +137,7 @@ export function decode(fileName: string) {
 
         for(let y = 0; y < height; y++) {
             for(let x = 0; x < width; x++) {
-                const color = currentPalette[data[x + width * y + imageStart]]
+                const color = palette[data[x + width * y + imageStart]]
                 ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
                 ctx.fillRect(x, y, 1, 1)
             }

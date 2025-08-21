@@ -28,6 +28,13 @@ export let formats: any = [
         paletteMultiplier: 4,
         paletteBytesPerChannel: 2,
     }, {
+        name: "Dimension Man VGA palette",
+        fileSize: 1543,
+
+        paletteStart: 7,
+        paletteMultiplier: 4,
+        paletteBytesPerChannel: 2,
+    }, {
         name: "Assault VGA palette",
         fileSize: 771,
 
@@ -66,6 +73,7 @@ export let formats: any = [
 
         imageStart: 11,
         widthIndex: 7,
+        divideWidthBy8: true,
         heightIndex: 9,
         bitsPerPixel: 8,
     },
