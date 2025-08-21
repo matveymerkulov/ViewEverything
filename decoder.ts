@@ -3,20 +3,26 @@ import {formats} from "./formats.js";
 
 export let currentPalette: number[][] = undefined
 
+function getInt(data: Uint8Array, index: number) {
+    return data[index] + 256 * data[index + 1]
+}
+
 export function decode(fileName: string) {
     const data: Uint8Array = electron.getData(fileName)
+    const dataLength = data.length
 
     for(const format of formats) {
-        console.log(format.name)
-
         const fileSize = format.fileSize
-        if(fileSize !== undefined && data.length !== fileSize) continue
+        if(fileSize !== undefined && dataLength !== fileSize) continue
 
         const paletteStart = format.paletteStart
         if(paletteStart !== undefined) {
             currentPalette = []
             const mul = format.paletteMultiplier ?? 1
             const indexMul = format.paletteBytesPerColor ?? 1
+
+            if(paletteStart + indexMul * 256 * 3 > dataLength) continue
+
             for (let colIndex = 0; colIndex < 256; colIndex++) {
                 currentPalette[colIndex] = []
                 for (let colorLayer = 0; colorLayer < 3; colorLayer++) {
@@ -24,16 +30,33 @@ export function decode(fileName: string) {
                     currentPalette[colIndex][colorLayer] = data[i] * mul
                 }
             }
+            console.log(format.name)
         } else if(currentPalette === undefined) {
             console.log("no palette")
             return
         }
 
-        const width = format.width
-        const height = format.height
-        if(width === undefined || height === undefined) return
+        let width = format.width
+        let height = format.height
 
-        //console.log(format.name)
+        const widthIndex = format.widthIndex
+        if(widthIndex !== undefined) {
+            if(widthIndex > dataLength - 2) continue
+            width = getInt(data, widthIndex) / 8
+        }
+        const heightIndex = format.heightIndex
+        if(heightIndex !== undefined) {
+            if(heightIndex > dataLength - 2) continue
+            height = getInt(data, heightIndex)
+        }
+
+        if(width === undefined || height === undefined) {
+            if(paletteStart !== undefined) return
+            continue
+        }
+
+        const imageStart = format.imageStart ?? 0
+        if(imageStart + width * height > dataLength) continue
 
         const canvas = document.createElement("canvas")
         canvas.width = width
@@ -42,12 +65,13 @@ export function decode(fileName: string) {
 
         for(let y = 0; y < height; y++) {
             for(let x = 0; x < width; x++) {
-                const color = currentPalette[data[x + width * y + 7]]
+                const color = currentPalette[data[x + width * y + imageStart]]
                 ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
                 ctx.fillRect(x, y, 1, 1)
             }
         }
 
+        console.log(format.name)
         return canvas
     }
 }

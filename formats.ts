@@ -36,5 +36,13 @@ export let formats: any = [
         paletteStart: 64007,
         paletteMultiplier: 4,
         paletteBytesPerColor: 1,
+    }, {
+        name: "QBasic BSAVE VGA image",
+        type: "QBasic Binary",
+
+        imageStart: 11,
+        widthIndex: 7,
+        heightIndex: 9,
+        bitsPerPixel: 8,
     },
 ]
