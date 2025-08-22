@@ -1,4 +1,5 @@
 import {currentPalette, decode} from "./decoder.js";
+import {inBounds, limit} from "./functions.js";
 
 export const electron = window["electron"]
 
@@ -22,14 +23,6 @@ let folderImage: HTMLImageElement
 let parentFolderImage: HTMLImageElement
 
 let screenY = 0, maxScreenY = 0, scrollAmount = 50
-
-function inBounds(value: number, min: number, max: number) {
-    return value >= min && value <= max
-}
-
-function limit(value: number, min: number, max: number) {
-    return value < min ? min : (value > max ? max : value)
-}
 
 document.addEventListener("DOMContentLoaded", () => {
     folderImage = document.getElementById("folder_image") as HTMLImageElement

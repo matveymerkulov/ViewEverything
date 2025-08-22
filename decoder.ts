@@ -1,23 +1,24 @@
-import {currentDir, electron, files} from "./main.js";
-import {formats} from "./formats.js";
+import {currentDir, electron, files} from "./main.js"
+import {formats, standardFormats} from "./formats.js"
+import {qbPalette} from "./qb_palette.js"
+import {isDigit, removeExtension} from "./functions.js"
 
-export let currentPalette: number[][] = [[0, 0, 0], [0, 0, 168], [0, 168, 0], [0, 168, 168], [168, 0, 0], [168, 0, 168], [168, 84, 0], [168, 168, 168], [84, 84, 84], [84, 84, 252], [84, 252, 84], [84, 252, 252], [252, 84, 84], [252, 84, 252], [252, 252, 84], [252, 252, 252], [0, 0, 0], [20, 20, 20], [32, 32, 32], [44, 44, 44], [56, 56, 56], [68, 68, 68], [80, 80, 80], [96, 96, 96], [112, 112, 112], [128, 128, 128], [144, 144, 144], [160, 160, 160], [180, 180, 180], [200, 200, 200], [224, 224, 224], [252, 252, 252], [0, 0, 252], [64, 0, 252], [124, 0, 252], [188, 0, 252], [252, 0, 252], [252, 0, 188], [252, 0, 124], [252, 0, 64], [252, 0, 0], [252, 64, 0], [252, 124, 0], [252, 188, 0], [252, 252, 0], [188, 252, 0], [124, 252, 0], [64, 252, 0], [0, 252, 0], [0, 252, 64], [0, 252, 124], [0, 252, 188], [0, 252, 252], [0, 188, 252], [0, 124, 252], [0, 64, 252], [124, 124, 252], [156, 124, 252], [188, 124, 252], [220, 124, 252], [252, 124, 252], [252, 124, 220], [252, 124, 188], [252, 124, 156], [252, 124, 124], [252, 156, 124], [252, 188, 124], [252, 220, 124], [252, 252, 124], [220, 252, 124], [188, 252, 124], [156, 252, 124], [124, 252, 124], [124, 252, 156], [124, 252, 188], [124, 252, 220], [124, 252, 252], [124, 220, 252], [124, 188, 252], [124, 156, 252], [180, 180, 252], [196, 180, 252], [216, 180, 252], [232, 180, 252], [252, 180, 252], [252, 180, 232], [252, 180, 216], [252, 180, 196], [252, 180, 180], [252, 196, 180], [252, 216, 180], [252, 232, 180], [252, 252, 180], [232, 252, 180], [216, 252, 180], [196, 252, 180], [180, 252, 180], [180, 252, 196], [180, 252, 216], [180, 252, 232], [180, 252, 252], [180, 232, 252], [180, 216, 252], [180, 196, 252], [0, 0, 112], [28, 0, 112], [56, 0, 112], [84, 0, 112], [112, 0, 112], [112, 0, 84], [112, 0, 56], [112, 0, 28], [112, 0, 0], [112, 28, 0], [112, 56, 0], [112, 84, 0], [112, 112, 0], [84, 112, 0], [56, 112, 0], [28, 112, 0], [0, 112, 0], [0, 112, 28], [0, 112, 56], [0, 112, 84], [0, 112, 112], [0, 84, 112], [0, 56, 112], [0, 28, 112], [56, 56, 112], [68, 56, 112], [84, 56, 112], [96, 56, 112], [112, 56, 112], [112, 56, 96], [112, 56, 84], [112, 56, 68], [112, 56, 56], [112, 68, 56], [112, 84, 56], [112, 96, 56], [112, 112, 56], [96, 112, 56], [84, 112, 56], [68, 112, 56], [56, 112, 56], [56, 112, 68], [56, 112, 84], [56, 112, 96], [56, 112, 112], [56, 96, 112], [56, 84, 112], [56, 68, 112], [80, 80, 112], [88, 80, 112], [96, 80, 112], [104, 80, 112], [112, 80, 112], [112, 80, 104], [112, 80, 96], [112, 80, 88], [112, 80, 80], [112, 88, 80], [112, 96, 80], [112, 104, 80], [112, 112, 80], [104, 112, 80], [96, 112, 80], [88, 112, 80], [80, 112, 80], [80, 112, 88], [80, 112, 96], [80, 112, 104], [80, 112, 112], [80, 104, 112], [80, 96, 112], [80, 88, 112], [0, 0, 64], [16, 0, 64], [32, 0, 64], [48, 0, 64], [64, 0, 64], [64, 0, 48], [64, 0, 32], [64, 0, 16], [64, 0, 0], [64, 16, 0], [64, 32, 0], [64, 48, 0], [64, 64, 0], [48, 64, 0], [32, 64, 0], [16, 64, 0], [0, 64, 0], [0, 64, 16], [0, 64, 32], [0, 64, 48], [0, 64, 64], [0, 48, 64], [0, 32, 64], [0, 16, 64], [32, 32, 64], [40, 32, 64], [48, 32, 64], [56, 32, 64], [64, 32, 64], [64, 32, 56], [64, 32, 48], [64, 32, 40], [64, 32, 32], [64, 40, 32], [64, 48, 32], [64, 56, 32], [64, 64, 32], [56, 64, 32], [48, 64, 32], [40, 64, 32], [32, 64, 32], [32, 64, 40], [32, 64, 48], [32, 64, 56], [32, 64, 64], [32, 56, 64], [32, 48, 64], [32, 40, 64], [44, 44, 64], [48, 44, 64], [52, 44, 64], [60, 44, 64], [64, 44, 64], [64, 44, 60], [64, 44, 52], [64, 44, 48], [64, 44, 44], [64, 48, 44], [64, 52, 44], [64, 60, 44], [64, 64, 44], [60, 64, 44], [52, 64, 44], [48, 64, 44], [44, 64, 44], [44, 64, 48], [44, 64, 52], [44, 64, 60], [44, 64, 64], [44, 60, 64], [44, 52, 64], [44, 48, 64], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+export let currentPalette: number[][] = qbPalette()
 let imagePalette: number[][]
 
-function isDigit(num: number) {
-    return (num >= 48 && num <= 57) || num === 46
-}
 
-function removeExtension(fileName: string) {
-    let dot = fileName.lastIndexOf(".")
-    if(dot > 0) return fileName.substring(0, dot)
-    return fileName
-}
+// DECODER
 
-export function decode(fileName: string, usePalette = false, getPalette = false) {
+
+export function decode(fileName: string, usePalette = false, getPalette = false): any {
     if(getPalette) imagePalette = undefined
 
-    const byteArray: Uint8Array = electron.getData(`${currentDir}/${fileName}`)
+    const fullFileName = `${currentDir}/${fileName}`
+    const byteArray: Uint8Array = electron.getData(fullFileName)
+
+
+    // FILE TYPE DETECTION
+
 
     let numbers = true, text = true, englishText = true
     for(let index = 0; index < byteArray.length; index++) {
@@ -33,6 +34,10 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
             numbers = false
         }
     }
+
+
+    // FILE CONTENTS CONVERSION
+
 
     let data: number[]
     if(numbers) {
@@ -60,12 +65,35 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
         data = Array.from(byteArray)
     }
 
-    const dataLength = data.length
 
-    function getInt(index: number) {
-        return data[index] + 256 * data[index + 1]
+    // STANDARD IMAGE FORMAT DETECTION
+
+
+    function checkHeader(format: any) {
+        const header: string = format.header
+        if(header !== undefined) {
+            for(let index = 0; index < header.length; index++) {
+                const char = data[index]
+                if(char >= 256) return false
+                if(String.fromCharCode(char) !== header.charAt(index)) return false
+            }
+        }
+        return true
     }
 
+    for(const format of standardFormats) {
+        if(checkHeader(format)) {
+            const tex = new Image()
+            tex.src = fullFileName
+            return tex
+        }
+    }
+
+
+    // FORMAT DETECTION
+
+
+    const dataLength = data.length
     for(const format of formats) {
         const fileSize = format.fileSize
         if(fileSize !== undefined && dataLength !== fileSize) continue
@@ -73,6 +101,12 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
         if(format.type === "numbers" && !numbers) continue
         if(format.type === "text" && !text) continue
         if(format.type === "english_text" && !englishText) continue
+
+        checkHeader(format)
+
+
+        // PALETTE DECODING
+
 
         let palette: number[][] = currentPalette
 
@@ -85,7 +119,7 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
             palette = []
             if(paletteStart + indexMul * 256 * colorMul > dataLength) continue
 
-            for (let colIndex = 0; colIndex < 256; colIndex++) {
+            for(let colIndex = 0; colIndex < 256; colIndex++) {
                 palette[colIndex] = []
                 for (let colorLayer = 0; colorLayer < 3; colorLayer++) {
                     const i = paletteStart + (colorLayer + colIndex * colorMul) * indexMul
@@ -105,6 +139,14 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
 
         if(getPalette) continue
 
+
+        // FORMAT CHECKING
+
+
+        function getInt(index: number) {
+            return data[index] + 256 * data[index + 1]
+        }
+
         let width = format.width
         let height = format.height
 
@@ -122,6 +164,10 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
             if(heightIndex > dataLength - 2) continue
             height = getInt(heightIndex)
         }
+
+
+        // PALETTE DISPLAYING
+
 
         if(width === undefined || height === undefined || width <= 0 || height <= 0) {
             if(paletteStart !== undefined) {
@@ -145,6 +191,10 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
 
         const imageStart = format.imageStart ?? 0
         if(imageStart + width * height > dataLength) continue
+
+
+        // IMAGE DECODING AND DISPLAYING
+
 
         const canvas = document.createElement("canvas")
         canvas.width = width

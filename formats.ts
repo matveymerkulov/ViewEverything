@@ -6,36 +6,64 @@ export enum fileType {
 }
 
 
-export let formats: any = [
+export let standardFormats = [
+    {
+        name: "Windows bitmap",
+        header: "BM6"
+    },
+    {
+        name: "Compuserve GIF",
+        header: "GIF87"
+    },
+    /*{
+        name: "PNG",
+        hexHeader: "89 50 4E 47"
+    },
+    {
+        name: "Windows bitmap",
+        hexHeader: "FF D8 FF E0 10 4A 46 49 46"
+    },*/
+]
 
-    // PALETTES
+
+export let formats: any = [
+    // CUSTOM PALETTES
+
+    {
+        name: "Another World Memory VGA palette",
+            fileSize: 1024,
+            paletteStart: 0,
+            paletteMultiplier: 4,
+            paletteBytesPerColor: 4,
+    }, {
+        name: "Alternate Logic Puzzles VGA palette",
+            fileSize: 1536,
+            paletteStart: 0,
+            paletteMultiplier: 4,
+            paletteBytesPerChannel: 2,
+    }, {
+        name: "Dimension Man VGA palette",
+            fileSize: 1543,
+            paletteStart: 7,
+            paletteMultiplier: 4,
+            paletteBytesPerChannel: 2,
+    }, {
+        name: "Assault VGA palette",
+            fileSize: 771,
+            paletteStart: 0,
+            paletteMultiplier: 4,
+    }, {
+        name: "Escape palette",
+        fileSize: 1030,
+        paletteStart: 0,
+        paletteMultiplier: 4,
+    },
+
+    // COMMON PALETTES
 
     {
         name: "Binary VGA palette",
         fileSize: 768,
-        paletteStart: 0,
-        paletteMultiplier: 4,
-    }, {
-        name: "Another World Memory VGA palette",
-        fileSize: 1024,
-        paletteStart: 0,
-        paletteMultiplier: 4,
-        paletteBytesPerColor: 4,
-    }, {
-        name: "Alternate Logic Puzzles VGA palette",
-        fileSize: 1536,
-        paletteStart: 0,
-        paletteMultiplier: 4,
-        paletteBytesPerChannel: 2,
-    }, {
-        name: "Dimension Man VGA palette",
-        fileSize: 1543,
-        paletteStart: 7,
-        paletteMultiplier: 4,
-        paletteBytesPerChannel: 2,
-    }, {
-        name: "Assault VGA palette",
-        fileSize: 771,
         paletteStart: 0,
         paletteMultiplier: 4,
     }, {
@@ -50,9 +78,9 @@ export let formats: any = [
         paletteStart: 0,
     },
 
-    // CUSTOM IMAGES
+    // CUSTOM IMAGE TYPES
 
-    // COMMON IMAGES
+    // COMMON IMAGE TYPES
 
     {
         name: "QBasic BSAVE VGA fullscreen image",
