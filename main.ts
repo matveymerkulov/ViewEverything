@@ -1,4 +1,4 @@
-import {decode} from "./decoder.js";
+import {currentPalette, decode} from "./decoder.js";
 
 export const electron = window["electron"]
 
@@ -125,12 +125,11 @@ document.addEventListener("DOMContentLoaded", () => {
         maxScreenY = Math.ceil(Math.ceil(files.length / thumbnailsPerRow)
             - canvas.height / thumbnailHeight) * thumbnailHeight
         if(maxScreenY < 0) maxScreenY = 0
-
-        step()
     }
 
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas()
+    window.addEventListener("resize", resizeCanvas)
+    step()
 
     canvas.addEventListener("mousemove", (event) => {
         const thumbnailNumber = Math.floor(event.x / thumbnailWidth)
@@ -153,7 +152,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if(currentDir.length <= 2) currentDir += "/"
         } else {
             if(!file.isDirectory) {
+                const palette = currentPalette
                 file.thumbnail = decode(fileName, true)
+                if(palette !== currentPalette) processingThumbnailNumber = 0
                 return
             }
             currentDir += `/${file.name}`
