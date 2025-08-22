@@ -31,6 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("canvas") as HTMLCanvasElement
     let ctx: CanvasRenderingContext2D
 
+
+    // CANVAS INITIALIZATION
+
+
     function resizeCanvas() {
         //canvas.style.width = document.body.offsetWidth + 'px';
         //canvas.style.height = document.body.offsetHeight + 'px';
@@ -51,6 +55,10 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshThumbnails()
     }
 
+
+    // DRAWING THUMBNAILS
+
+
     let processingThumbnailNumber = 0
 
     function step() {
@@ -64,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const x = col * thumbnailWidth
 
             const img = file.isDirectory ? folderImage : file.thumbnail
-            if(img !== undefined) {
+            if(img !== undefined && img.width > 0 && img.height > 0) {
                 const scale = Math.min((thumbnailWidth - 3) / img.width, (imageHeight - 3) / img.height)
                 const imgWidth = scale * img.width
                 const imgHeight = scale * img.height
@@ -123,6 +131,10 @@ document.addEventListener("DOMContentLoaded", () => {
     resizeCanvas()
     window.addEventListener("resize", resizeCanvas)
     step()
+
+
+    // INPUT
+
 
     canvas.addEventListener("mousemove", (event) => {
         const thumbnailNumber = Math.floor(event.x / thumbnailWidth)

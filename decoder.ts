@@ -73,11 +73,17 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
         const header: string = format.header
         if(header !== undefined) {
             for(let index = 0; index < header.length; index++) {
-                const char = data[index]
-                if(char >= 256) return false
-                if(String.fromCharCode(char) !== header.charAt(index)) return false
+                if(data[index] !== header.charCodeAt(index)) return false
             }
         }
+
+        const hexHeader: string = format.hexHeader
+        if(hexHeader !== undefined) {
+            for(let index = 0; index < hexHeader.length; index += 3) {
+                if(data[index / 3] !== hexHeader.charCodeAt(index + 1) + 16 * hexHeader.charCodeAt(index)) return false
+            }
+        }
+
         return true
     }
 
