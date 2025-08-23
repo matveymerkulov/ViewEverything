@@ -195,9 +195,8 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             if(widthIndex !== undefined) {
                 if(widthIndex > dataLength - 2) break
                 width = getInt(start + widthIndex)
-                if(itemFormat.divideWidthBy8) {
-                    if(width % 8 !== 0) break
-                    width /= 8
+                if(itemFormat.qbPut) {
+                    width = width >> 3
                 }
             }
 
@@ -209,7 +208,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
 
             if(width === undefined || height === undefined || width <= 0 || height <= 0) break
 
-            start += itemFormat.imageStart ?? 0
+            if(format.container) start += itemFormat.imageStart ?? 0
             if(start + width * height > dataLength) break
 
 
@@ -236,7 +235,9 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             }
 
             items.push({name: start, thumbnail: canvas})
+            const size = width * height
             start += width * height
+            if(itemFormat.qbPut) start += size % 2
         }
 
 
@@ -262,6 +263,11 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
                 return
             }
             continue
+        }
+
+        if(items.length === 1) {
+            file.thumbnail = items[0].thumbnail
+            return
         }
 
         return items

@@ -131,7 +131,7 @@ export let formats: any = [
             name: "QBasic BSAVE VGA image",
             imageStart: 4,
             widthIndex: 0,
-            divideWidthBy8: true,
+            qbPut: true,
             heightIndex: 2,
             bitsPerPixel: 8,
         },
