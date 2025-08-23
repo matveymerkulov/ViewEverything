@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const file = files[n]
             const x = col * thumbnailWidth
 
-            const img = file.isDirectory ? folderImage : file.thumbnail
+            const img = file.isDirectory ? (file.thumbnail ?? folderImage) : file.thumbnail
             if(img !== undefined && img.width > 0 && img.height > 0) {
                 const scale = Math.min((thumbnailWidth - 3) / img.width, (imageHeight - 3) / img.height)
                 const imgWidth = scale * img.width

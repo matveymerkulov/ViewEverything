@@ -1,5 +1,5 @@
 import {currentDir, electron, files} from "./main.js"
-import {formats, standardFormats} from "./formats.js"
+import {formats, standardImageFormats} from "./formats.js"
 import {qbPalette} from "./qb_palette.js"
 import {isDigit, removeExtension} from "./functions.js"
 
@@ -15,6 +15,45 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
 
     const fullFileName = `${currentDir}/${fileName}`
     const byteArray: Uint8Array = electron.getData(fullFileName)
+
+
+    // STANDARD IMAGE FORMAT DETECTION
+
+
+    function checkHeader(format: any) {
+        function hexValue(code: number) {
+            return code - (code >= 65 ? 55 : 48)
+        }
+
+        const headerStart: number = format.headerStart ?? 0
+
+        const header: string = format.header
+        if(header !== undefined && headerStart + header.length < byteArray.length) {
+            for(let index = 0; index < header.length; index++) {
+                if(byteArray[index + headerStart] !== header.charCodeAt(index)) return false
+            }
+        }
+
+        const hexHeader: string = format.hexHeader
+        if(hexHeader !== undefined && headerStart + (hexHeader.length + 1) / 3 < byteArray.length) {
+            for(let index = 0; index < hexHeader.length; index += 3) {
+                if(byteArray[index / 3 + headerStart] !== hexValue(hexHeader.charCodeAt(index + 1))
+                        + 16 * hexValue(hexHeader.charCodeAt(index))) {
+                    return false
+                }
+            }
+        }
+
+        return true
+    }
+
+    for(const format of standardImageFormats) {
+        if(checkHeader(format)) {
+            const tex = new Image()
+            tex.src = fullFileName
+            return tex
+        }
+    }
 
 
     // FILE TYPE DETECTION
@@ -64,42 +103,12 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
     } else {
         data = Array.from(byteArray)
     }
-
-
-    // STANDARD IMAGE FORMAT DETECTION
-
-
-    function checkHeader(format: any) {
-        const header: string = format.header
-        if(header !== undefined) {
-            for(let index = 0; index < header.length; index++) {
-                if(data[index] !== header.charCodeAt(index)) return false
-            }
-        }
-
-        const hexHeader: string = format.hexHeader
-        if(hexHeader !== undefined) {
-            for(let index = 0; index < hexHeader.length; index += 3) {
-                if(data[index / 3] !== hexHeader.charCodeAt(index + 1) + 16 * hexHeader.charCodeAt(index)) return false
-            }
-        }
-
-        return true
-    }
-
-    for(const format of standardFormats) {
-        if(checkHeader(format)) {
-            const tex = new Image()
-            tex.src = fullFileName
-            return tex
-        }
-    }
+    const dataLength = data.length
 
 
     // FORMAT DETECTION
 
 
-    const dataLength = data.length
     for(const format of formats) {
         const fileSize = format.fileSize
         if(fileSize !== undefined && dataLength !== fileSize) continue
@@ -123,7 +132,7 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
             const colorMul = format.paletteBytesPerColor ?? 3
 
             palette = []
-            if(paletteStart + indexMul * 256 * colorMul > dataLength) continue
+            if(paletteStart + indexMul * (255 * colorMul + 3) > dataLength) continue
 
             for(let colIndex = 0; colIndex < 256; colIndex++) {
                 palette[colIndex] = []

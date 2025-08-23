@@ -6,22 +6,24 @@ export enum fileType {
 }
 
 
-export let standardFormats = [
+export let standardImageFormats = [
     {
         name: "BMP",
-        header: "BM"
-    },
-    {
+        header: "BM",
+    }, {
         name: "GIF",
-        header: "GIF87"
-    },
-    {
+        header: "GIF8",
+    }, {
         name: "PNG",
-        hexHeader: "89 50 4E 47"
-    },
-    {
+        hexHeader: "89 50 4E 47",
+    }, {
         name: "JPEG",
-        hexHeader: "FF D8 FF E0 10 4A 46 49 46"
+        headerStart: 6,
+        header: "JFIF",
+    }, {
+        name: "JPEG",
+        headerStart: 6,
+        header: "Exif",
     },
 ]
 
@@ -31,24 +33,28 @@ export let formats: any = [
 
     {
         name: "Another World Memory VGA palette",
+        fileName: "ANOTHER.PAL",
         fileSize: 1024,
         paletteStart: 0,
         paletteMultiplier: 4,
         paletteBytesPerColor: 4,
     }, {
         name: "Alternate Logic Puzzles VGA palette",
+        fileName: "PALETTE.PAL",
         fileSize: 1536,
         paletteStart: 0,
         paletteMultiplier: 4,
         paletteBytesPerChannel: 2,
     }, {
         name: "Dimension Man VGA palette",
+        fileName: "DM_CLR.DAT",
         fileSize: 1543,
         paletteStart: 7,
         paletteMultiplier: 4,
         paletteBytesPerChannel: 2,
     }, {
         name: "Assault VGA palette",
+        fileName: "Title.pal",
         fileSize: 771,
         paletteStart: 0,
         paletteMultiplier: 4,
@@ -57,6 +63,7 @@ export let formats: any = [
         fileSize: 1030,
         paletteStart: 7,
         paletteMultiplier: 4,
+        paletteBytesPerColor: 4,
     },
 
     // COMMON PALETTES
