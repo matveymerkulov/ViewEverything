@@ -162,12 +162,12 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
         if(paletteStart === undefined) {
             const fileNameWithoutExtension = removeExtension(file.name)
             for(const file of files) {
-                if(removeExtension(file.name) === fileNameWithoutExtension) {
-                    decode(file, false, true)
-                    if(!imagePalette) continue
-                    palette = imagePalette
-                    break
-                }
+                if(file.isDirectory) continue
+                if(removeExtension(file.name) !== fileNameWithoutExtension) continue
+                decode(file, false, true)
+                if(!imagePalette) continue
+                palette = imagePalette
+                break
             }
         }
 
@@ -236,7 +236,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
 
             items.push({name: start, thumbnail: canvas})
             const size = width * height
-            start += width * height
+            start += format.fixedShift ?? width * height
             if(itemFormat.qbPut) start += size % 2
         }
 

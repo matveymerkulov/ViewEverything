@@ -28,6 +28,16 @@ export let standardImageFormats = [
 ]
 
 
+const qbBSave = {
+    name: "QBasic BSAVE VGA image",
+    imageStart: 4,
+    widthIndex: 0,
+    qbPut: true,
+    heightIndex: 2,
+    bitsPerPixel: 8,
+}
+
+
 export let formats: any = [
     // CUSTOM PALETTES
 
@@ -54,15 +64,15 @@ export let formats: any = [
         paletteMultiplier: 4,
         paletteBytesPerChannel: 2,
     }, {
-        hexHeader: "FD",
         name: "Assault VGA palette",
+        hexHeader: "FD",
         fileName: "Title.pal",
         fileSize: 771,
         paletteStart: 0,
         paletteMultiplier: 4,
     }, {
-        hexHeader: "FD",
         name: "Escape palette",
+        hexHeader: "FD",
         fileSize: 1030,
         paletteStart: 7,
         paletteMultiplier: 4,
@@ -101,6 +111,14 @@ export let formats: any = [
         width: 320,
         height: 200,
         bitsPerPixel: 8,
+    }, {
+        name: "Power of love container",
+        hexHeader: "FD",
+        fileName: "SPRITES.DAT, SPRTMASK.DAT",
+        fileSize: 1327,
+        imageStart: 7,
+        fixedShift: 116,
+        container: qbBSave,
     },
 
     // COMMON IMAGE TYPES
@@ -127,13 +145,6 @@ export let formats: any = [
         name: "QBasic BSAVE container",
         hexHeader: "FD",
         imageStart: 7,
-        container: {
-            name: "QBasic BSAVE VGA image",
-            imageStart: 4,
-            widthIndex: 0,
-            qbPut: true,
-            heightIndex: 2,
-            bitsPerPixel: 8,
-        },
+        container: qbBSave,
     },
 ]
