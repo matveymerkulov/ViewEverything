@@ -32,7 +32,7 @@ const qbBSave = {
     name: "QBasic BSAVE VGA image",
     imageStart: 4,
     widthIndex: 0,
-    qbPut: true,
+    bSave: true,
     heightIndex: 2,
     bitsPerPixel: 8,
 }
@@ -50,7 +50,7 @@ export let formats: any = [
         paletteBytesPerColor: 4,
     }, {
         name: "Alternate Logic Puzzles VGA palette",
-        fileName: "PALETTE.PAL",
+        extension: "PAL",
         fileSize: 1536,
         paletteStart: 0,
         paletteMultiplier: 4,
@@ -89,8 +89,8 @@ export let formats: any = [
         paletteMultiplier: 4,
     }, {
         name: "CosmoX VGA palette",
-        extension: "PAL",
         header: "CosmoX",
+        extension: "PAL",
         fileSize: 808,
         paletteStart: 40,
         paletteMultiplier: 4,
@@ -119,6 +119,14 @@ export let formats: any = [
         imageStart: 7,
         fixedShift: 116,
         container: qbBSave,
+    }, {
+        name: "Resistance texture",
+        hexHeader: "FD",
+        extension: "TXR",
+        fileSize: 4103,
+        imageStart: 7,
+        width: 64,
+        height: 64,
     },
 
     // COMMON IMAGE TYPES
@@ -141,6 +149,13 @@ export let formats: any = [
         bitsPerPixel: 8,
         paletteStart: 64007,
         paletteMultiplier: 4,
+    }, {
+        name: "Robot robbery image",
+        hexHeader: "FD",
+        extension: "PIC",
+        imageStart: 7,
+        width: 320,
+        determineHeight: true,
     }, {
         name: "QBasic BSAVE container",
         hexHeader: "FD",

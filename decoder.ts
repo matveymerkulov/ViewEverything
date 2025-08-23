@@ -188,22 +188,27 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
                 return data[index] + 256 * data[index + 1]
             }
 
-            let width = itemFormat.width
-            let height = itemFormat.height
+            let width: number = itemFormat.width
+            let height: number = itemFormat.height
 
-            const widthIndex = itemFormat.widthIndex
+            const widthIndex: number = itemFormat.widthIndex
             if(widthIndex !== undefined) {
                 if(widthIndex > dataLength - 2) break
                 width = getInt(start + widthIndex)
-                if(itemFormat.qbPut) {
+                if(itemFormat.bSave) {
                     width = width >> 3
                 }
             }
 
-            const heightIndex = itemFormat.heightIndex
+            const heightIndex: number = itemFormat.heightIndex
             if(heightIndex !== undefined) {
                 if(heightIndex > dataLength - 2) break
                 height = getInt(start + heightIndex)
+            }
+
+            const imageDataLength = dataLength - itemFormat.imageStart
+            if(itemFormat.determineHeight && (imageDataLength % width) === 0) {
+                height = imageDataLength / width
             }
 
             if(width === undefined || height === undefined || width <= 0 || height <= 0) break
@@ -234,10 +239,10 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
                 return
             }
 
-            items.push({name: start, thumbnail: canvas})
+            items.push({name: items.length, thumbnail: canvas})
             const size = width * height
             start += format.fixedShift ?? width * height
-            if(itemFormat.qbPut) start += size % 2
+            if(itemFormat.bSave) start += size % 2
         }
 
 

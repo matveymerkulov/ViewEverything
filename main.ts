@@ -124,6 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function refreshThumbnails() {
+        processingThumbnailNumber = 0
         files = electron.getDir(currentDir)
         if(currentDir.length > 3) {
             files.unshift({name: "..", thumbnail: parentFolderImage, isDirectory: true})
@@ -180,7 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
             currentDir += `/${file.name}`
         }
 
-        processingThumbnailNumber = 0
         refreshThumbnails()
     })
 })
