@@ -47,18 +47,21 @@ export let formats: any = [
         paletteBytesPerChannel: 2,
     }, {
         name: "Dimension Man VGA palette",
+        hexHeader: "FD",
         fileName: "DM_CLR.DAT",
         fileSize: 1543,
         paletteStart: 7,
         paletteMultiplier: 4,
         paletteBytesPerChannel: 2,
     }, {
+        hexHeader: "FD",
         name: "Assault VGA palette",
         fileName: "Title.pal",
         fileSize: 771,
         paletteStart: 0,
         paletteMultiplier: 4,
     }, {
+        hexHeader: "FD",
         name: "Escape palette",
         fileSize: 1030,
         paletteStart: 7,
@@ -70,17 +73,20 @@ export let formats: any = [
 
     {
         name: "Binary VGA palette",
+        extension: "PAL",
         fileSize: 768,
         paletteStart: 0,
         paletteMultiplier: 4,
     }, {
         name: "CosmoX VGA palette",
+        extension: "PAL",
         header: "CosmoX",
         fileSize: 808,
         paletteStart: 40,
         paletteMultiplier: 4,
     }, {
         name: "Digital VGA palette",
+        extension: "PAL",
         type: "numbers",
         paletteStart: 0,
     },
@@ -89,6 +95,7 @@ export let formats: any = [
 
     {
         name: "Groov Buggies BSAVE VGA fullscreen image",
+        hexHeader: "FD",
         fileSize: 64011,
         imageStart: 11,
         width: 320,
@@ -100,6 +107,7 @@ export let formats: any = [
 
     {
         name: "QBasic BSAVE VGA fullscreen image",
+        hexHeader: "FD",
         fileSize: 64007,
         imageStart: 7,
         width: 320,
@@ -107,6 +115,7 @@ export let formats: any = [
         bitsPerPixel: 8,
     }, {
         name: "QBasic BSAVE VGA fullscreen image with palette",
+        hexHeader: "FD",
         fileSize: 64775,
         imageStart: 7,
         width: 320,
@@ -115,11 +124,16 @@ export let formats: any = [
         paletteStart: 64007,
         paletteMultiplier: 4,
     }, {
-        name: "QBasic BSAVE VGA image",
-        imageStart: 11,
-        widthIndex: 7,
-        divideWidthBy8: true,
-        heightIndex: 9,
-        bitsPerPixel: 8,
+        name: "QBasic BSAVE container",
+        hexHeader: "FD",
+        imageStart: 7,
+        container: {
+            name: "QBasic BSAVE VGA image",
+            imageStart: 4,
+            widthIndex: 0,
+            divideWidthBy8: true,
+            heightIndex: 2,
+            bitsPerPixel: 8,
+        },
     },
 ]

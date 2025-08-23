@@ -10,10 +10,10 @@ let imagePalette: number[][]
 // DECODER
 
 
-export function decode(fileName: string, usePalette = false, getPalette = false): any {
+export function decode(file: any, usePalette = false, getPalette = false, expand = false): any[] {
     if(getPalette) imagePalette = undefined
 
-    const fullFileName = `${currentDir}/${fileName}`
+    const fullFileName = `${currentDir}/${file.name}`
     const byteArray: Uint8Array = electron.getData(fullFileName)
 
 
@@ -51,7 +51,8 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
         if(checkHeader(format)) {
             const tex = new Image()
             tex.src = fullFileName
-            return tex
+            file.thumbnail = tex
+            return
         }
     }
 
@@ -155,72 +156,14 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
         if(getPalette) continue
 
 
-        // FORMAT CHECKING
+        // SEARCHING FOR PALETTE WITH SAME NAME
 
-
-        function getInt(index: number) {
-            return data[index] + 256 * data[index + 1]
-        }
-
-        let width = format.width
-        let height = format.height
-
-        const widthIndex = format.widthIndex
-        if(widthIndex !== undefined) {
-            if(widthIndex > dataLength - 2) continue
-            width = getInt(widthIndex)
-            if(format.divideWidthBy8) {
-                if(width % 8 !== 0) continue
-                width /= 8
-            }
-        }
-        const heightIndex = format.heightIndex
-        if(heightIndex !== undefined) {
-            if(heightIndex > dataLength - 2) continue
-            height = getInt(heightIndex)
-        }
-
-
-        // PALETTE DISPLAYING
-
-
-        if(width === undefined || height === undefined || width <= 0 || height <= 0) {
-            if(paletteStart !== undefined) {
-                const canvas = document.createElement("canvas")
-                canvas.width = 256
-                canvas.height = 256
-                const ctx = canvas.getContext("2d")
-
-                for (let y = 0; y < 16; y++) {
-                    for (let x = 0; x < 16; x++) {
-                        let color = palette[x + 16 * y]
-                        ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
-                        ctx.fillRect(x * 16, y * 16, 16, 16)
-                    }
-                }
-
-                return canvas
-            }
-            continue
-        }
-
-        const imageStart = format.imageStart ?? 0
-        if(imageStart + width * height > dataLength) continue
-
-
-        // IMAGE DECODING AND DISPLAYING
-
-
-        const canvas = document.createElement("canvas")
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext("2d")
 
         if(paletteStart === undefined) {
-            const fileNameWithoutExtension = removeExtension(fileName)
+            const fileNameWithoutExtension = removeExtension(file.name)
             for(const file of files) {
                 if(removeExtension(file.name) === fileNameWithoutExtension) {
-                    decode(file.name, false, true)
+                    decode(file, false, true)
                     if(!imagePalette) continue
                     palette = imagePalette
                     break
@@ -228,15 +171,99 @@ export function decode(fileName: string, usePalette = false, getPalette = false)
             }
         }
 
-        for(let y = 0; y < height; y++) {
-            for(let x = 0; x < width; x++) {
-                const color = palette[data[x + width * y + imageStart]]
-                ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
-                ctx.fillRect(x, y, 1, 1)
+
+        // EXTRACTING IMAGES
+
+
+        let start = format.imageStart ?? 0
+        const items = []
+        const itemFormat = format.container ?? format
+        while(true) {
+
+
+            // FORMAT CHECKING
+
+
+            function getInt(index: number) {
+                return data[index] + 256 * data[index + 1]
             }
+
+            let width = itemFormat.width
+            let height = itemFormat.height
+
+            const widthIndex = itemFormat.widthIndex
+            if(widthIndex !== undefined) {
+                if(widthIndex > dataLength - 2) break
+                width = getInt(start + widthIndex)
+                if(itemFormat.divideWidthBy8) {
+                    if(width % 8 !== 0) break
+                    width /= 8
+                }
+            }
+
+            const heightIndex = itemFormat.heightIndex
+            if(heightIndex !== undefined) {
+                if(heightIndex > dataLength - 2) break
+                height = getInt(start + heightIndex)
+            }
+
+            if(width === undefined || height === undefined || width <= 0 || height <= 0) break
+
+            start += itemFormat.imageStart ?? 0
+            if(start + width * height > dataLength) break
+
+
+            // IMAGE DECODING AND DISPLAYING
+
+
+            const canvas = document.createElement("canvas")
+            canvas.width = width
+            canvas.height = height
+            const ctx = canvas.getContext("2d")
+
+            for(let y = 0; y < height; y++) {
+                for(let x = 0; x < width; x++) {
+                    const color = palette[data[start + x + width * y]]
+                    ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+                    ctx.fillRect(x, y, 1, 1)
+                }
+            }
+
+            if(!expand) {
+                console.log(itemFormat.name)
+                file.thumbnail = canvas
+                return
+            }
+
+            items.push({name: start, thumbnail: canvas})
+            start += width * height
         }
 
-        console.log(format.name)
-        return canvas
+
+        // PALETTE DISPLAYING
+
+
+        if(items.length === 0) {
+            if(paletteStart !== undefined) {
+                const canvas = document.createElement("canvas")
+                canvas.width = 256
+                canvas.height = 256
+                const ctx = canvas.getContext("2d")
+
+                for(let y = 0; y < 16; y++) {
+                    for(let x = 0; x < 16; x++) {
+                        let color = palette[x + 16 * y]
+                        ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+                        ctx.fillRect(x * 16, y * 16, 16, 16)
+                    }
+                }
+
+                file.thumbnail = canvas
+                return
+            }
+            continue
+        }
+
+        return items
     }
 }

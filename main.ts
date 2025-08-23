@@ -8,21 +8,25 @@ const NONE = -1
 export let currentDir = "D:/sync/content"
 export let files = []
 
+const textHeight = 22
+const fontSize = 16
+const backgroundColor = "gray"
+const thumbnailBorderColor = "white"
+const thumbnailBorderWidth = 2
+
 let thumbnailsPerRow = 4
 let thumbnailsRatio = 200 / 320
-let textHeight = 22
-let fontSize = 16
-let backgroundColor = "gray"
-let thumbnailBorderColor = "white"
-let thumbnailBorderWidth = 2
+let currentThumbnail = NONE
+
 let thumbnailTextColor = "black"
 let thumbnailWidth = 1, thumbnailHeight = 1
 let imageHeight = 1
-let currentThumbnail = NONE
+
 let folderImage: HTMLImageElement
 let parentFolderImage: HTMLImageElement
 
 let screenY = 0, maxScreenY = 0, scrollAmount = 50
+let viewingContainer = false
 
 document.addEventListener("DOMContentLoaded", () => {
     folderImage = document.getElementById("folder_image") as HTMLImageElement
@@ -36,8 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     function resizeCanvas() {
-        //canvas.style.width = document.body.offsetWidth + 'px';
-        //canvas.style.height = document.body.offsetHeight + 'px';
         canvas.width = document.body.offsetWidth;
         canvas.height = document.body.offsetHeight;
 
@@ -46,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.lineWidth = thumbnailBorderWidth
         ctx.font = fontSize + "px sans-serif"
         ctx.textAlign = "center"
-        ctx.textBaseline = "middle";
+        ctx.textBaseline = "middle"
 
         thumbnailWidth = document.body.clientWidth / thumbnailsPerRow
         imageHeight = thumbnailWidth * thumbnailsRatio
@@ -89,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.fillStyle = thumbnailBorderColor
             ctx.fillRect(x + 1, y + imageHeight + 1, thumbnailWidth - 3, textHeight)
 
-            let text = file.name
+            let text: string = file.name
             ctx.fillStyle = thumbnailTextColor
             while(true) {
                 if(ctx.measureText(text).width <= thumbnailWidth || text.length <= 3) break
@@ -105,15 +107,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         ctx.stroke()
 
-        if(processingThumbnailNumber < files.length) {
+        if(processingThumbnailNumber < files.length && !viewingContainer) {
             const file = files[processingThumbnailNumber]
-            if(!file.isDirectory) {
-                file.thumbnail = decode(file.name)
-            }
+            if(!file.isDirectory) decode(file)
             processingThumbnailNumber++
         }
 
         requestAnimationFrame(step)
+    }
+
+    function calculateFileListBounds() {
+        screenY = 0
+        maxScreenY = Math.ceil(Math.ceil(files.length / thumbnailsPerRow)
+            - canvas.height / thumbnailHeight) * thumbnailHeight
+        if(maxScreenY < 0) maxScreenY = 0
     }
 
     function refreshThumbnails() {
@@ -121,11 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(currentDir.length > 3) {
             files.unshift({name: "..", thumbnail: parentFolderImage, isDirectory: true})
         }
-
-        screenY = 0
-        maxScreenY = Math.ceil(Math.ceil(files.length / thumbnailsPerRow)
-            - canvas.height / thumbnailHeight) * thumbnailHeight
-        if(maxScreenY < 0) maxScreenY = 0
+        calculateFileListBounds()
     }
 
     resizeCanvas()
@@ -153,15 +156,27 @@ document.addEventListener("DOMContentLoaded", () => {
         const file = files[currentThumbnail]
         const fileName = file.name
         if(fileName === "..") {
-            currentDir = currentDir.substring(0, currentDir.lastIndexOf("/"))
-            if(currentDir.length <= 2) currentDir += "/"
-        } else {
-            if(!file.isDirectory) {
-                const palette = currentPalette
-                file.thumbnail = decode(fileName, true)
-                if(palette !== currentPalette) processingThumbnailNumber = 0
+            if(viewingContainer) {
+                viewingContainer = false
+            } else {
+                currentDir = currentDir.substring(0, currentDir.lastIndexOf("/"))
+                if(currentDir.length <= 2) currentDir += "/"
+            }
+        } else if(!file.isDirectory) {
+            const palette = currentPalette
+            const contents = decode(file, true, false, true)
+            if(contents !== undefined) {
+                viewingContainer = true
+                files = contents
+                files.unshift({name: "..", thumbnail: parentFolderImage, isDirectory: true})
+                calculateFileListBounds()
+                return
+            } else if(palette === currentPalette) {
                 return
             }
+            processingThumbnailNumber = 0
+            return
+        } else {
             currentDir += `/${file.name}`
         }
 
