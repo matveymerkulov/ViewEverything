@@ -151,6 +151,12 @@ document.addEventListener("DOMContentLoaded", () => {
         screenY = limit(screenY, 0, maxScreenY)
     })
 
+    /*document.addEventListener("keydown", event => {
+        if(event.code === "ArrowLeft") dStart--
+        if(event.code === "ArrowRight") dStart++
+        refreshThumbnails()
+    })*/
+
     canvas.addEventListener("dblclick", () => {
         if(currentThumbnail === NONE) return
 

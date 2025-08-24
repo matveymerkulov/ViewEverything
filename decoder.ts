@@ -1,4 +1,4 @@
-import {currentDir, electron, files} from "./main.js"
+import {currentDir, dStart, electron, files, inverted} from "./main.js"
 import {formats, standardImageFormats} from "./formats.js"
 import {qbPalette} from "./qb_palette.js"
 import {isDigit, removeExtension} from "./functions.js"
@@ -176,6 +176,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
 
 
         let start = format.imageStart ?? 0
+        const layers = format.layers
         const items = []
         const itemFormat = format.container ?? format
         while(true) {
@@ -197,6 +198,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
                 width = getInt(start + widthIndex)
                 if(itemFormat.bSave) {
                     width = width >> 3
+                    if(layers) width = width << 3
                 }
             }
 
@@ -214,7 +216,9 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             if(width === undefined || height === undefined || width <= 0 || height <= 0) break
 
             if(format.container) start += itemFormat.imageStart ?? 0
-            if(start + width * height > dataLength) break
+            let size = width * height
+            if(layers) size = (size * layers) >> 3
+            if(start + size > dataLength) break
 
 
             // IMAGE DECODING AND DISPLAYING
@@ -225,11 +229,31 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             canvas.height = height
             const ctx = canvas.getContext("2d")
 
-            for(let y = 0; y < height; y++) {
-                for(let x = 0; x < width; x++) {
-                    const color = palette[data[start + x + width * y]]
-                    ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
-                    ctx.fillRect(x, y, 1, 1)
+
+            if(layers) {
+                const byteWidth = 3
+                const layerSize = byteWidth * height
+                for(let y = 0; y < height; y++) {
+                    for(let x = 0; x < byteWidth; x++) {
+                        for(let bytePos = 0; bytePos < 8; bytePos++) {
+                            let colorIndex = 0
+                            for(let layer = 3; layer >= 0; layer--) {
+                                const dataPos = start + 4 + x + byteWidth * (layer + layers * y)
+                                colorIndex = (colorIndex << 1) + ((data[dataPos] >> 7 - bytePos) & 1)
+                            }
+                            const color = palette[colorIndex]
+                            ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+                            ctx.fillRect(bytePos + 8 * x, y, 1, 1)
+                        }
+                    }
+                }
+            } else {
+                for(let y = 0; y < height; y++) {
+                    for(let x = 0; x < width; x++) {
+                        const color = palette[data[start + x + width * y]]
+                        ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+                        ctx.fillRect(x, y, 1, 1)
+                    }
                 }
             }
 
@@ -240,8 +264,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             }
 
             items.push({name: items.length, thumbnail: canvas})
-            const size = width * height
-            start += format.fixedShift ?? width * height
+            start += format.fixedShift ?? size
             if(itemFormat.bSave) start += size % 2
         }
 

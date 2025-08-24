@@ -110,7 +110,6 @@ export let formats: any = [
         imageStart: 11,
         width: 320,
         height: 200,
-        bitsPerPixel: 8,
     }, {
         name: "Power of love container",
         hexHeader: "FD",
@@ -127,6 +126,15 @@ export let formats: any = [
         imageStart: 7,
         width: 64,
         height: 64,
+    }, {
+        name: "Secret of Cooey tile",
+        hexHeader: "FD",
+        extension: "TIL, MSK",
+        fileSize: 307,
+        imageStart: 7,
+        widthIndex: 0,
+        heightIndex: 2,
+        layers: 4,
     },
 
     // COMMON IMAGE TYPES
@@ -138,7 +146,6 @@ export let formats: any = [
         imageStart: 7,
         width: 320,
         height: 200,
-        bitsPerPixel: 8,
     }, {
         name: "QBasic BSAVE VGA fullscreen image with palette",
         hexHeader: "FD",
@@ -146,10 +153,20 @@ export let formats: any = [
         imageStart: 7,
         width: 320,
         height: 200,
-        bitsPerPixel: 8,
         paletteStart: 64007,
         paletteMultiplier: 4,
-    }, {
+    },
+
+    // CONTAINERS
+
+    /*{
+        name: "Shell shock image container",
+        hexHeader: "FD",
+        extension: "SPR",
+        imageStart: 7,
+        fixedShift: 402,
+        container: qbBSave,
+    },*/ {
         name: "Robot robbery image",
         hexHeader: "FD",
         extension: "PIC",
