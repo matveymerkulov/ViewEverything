@@ -5,7 +5,7 @@ export const electron = window["electron"]
 
 const NONE = -1
 
-export let currentDir = "D:/sync/content"
+export let currentDir = "D:/sync/content/zap"
 export let files = []
 
 const textHeight = 22
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
         imageHeight = thumbnailWidth * thumbnailsRatio
         thumbnailHeight = imageHeight + textHeight + 2
 
-        refreshThumbnails()
+        calculateFileListBounds()
     }
 
 
@@ -133,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     resizeCanvas()
+    refreshThumbnails()
     window.addEventListener("resize", resizeCanvas)
     step()
 
@@ -147,15 +148,32 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     canvas.addEventListener("wheel", (event) => {
-        screenY += event.deltaY / 100 * scrollAmount
-        screenY = limit(screenY, 0, maxScreenY)
+        if(event.ctrlKey) {
+            thumbnailsPerRow = limit(thumbnailsPerRow + event.deltaY / 100, 1, 64)
+            resizeCanvas()
+        } else {
+            screenY += event.deltaY / 100 * scrollAmount
+            screenY = limit(screenY, 0, maxScreenY)
+        }
     })
 
-    /*document.addEventListener("keydown", event => {
-        if(event.code === "ArrowLeft") dStart--
-        if(event.code === "ArrowRight") dStart++
-        refreshThumbnails()
-    })*/
+    function back() {
+        if(viewingContainer) {
+            viewingContainer = false
+        } else {
+            currentDir = currentDir.substring(0, currentDir.lastIndexOf("/"))
+            if(currentDir.length <= 2) currentDir += "/"
+        }
+    }
+
+    document.addEventListener("keydown", event => {
+        if(event.code === "Home") screenY = 0
+        if(event.code === "End") screenY = maxScreenY
+        if(event.code === "Backspace") {
+            back()
+            refreshThumbnails()
+        }
+    })
 
     canvas.addEventListener("dblclick", () => {
         if(currentThumbnail === NONE) return
@@ -163,12 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const file = files[currentThumbnail]
         const fileName = file.name
         if(fileName === "..") {
-            if(viewingContainer) {
-                viewingContainer = false
-            } else {
-                currentDir = currentDir.substring(0, currentDir.lastIndexOf("/"))
-                if(currentDir.length <= 2) currentDir += "/"
-            }
+            back()
         } else if(!file.isDirectory) {
             const palette = currentPalette
             const contents = decode(file, true, false, true)

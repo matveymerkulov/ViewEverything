@@ -158,6 +158,14 @@ export let formats: any = [
         fixedShift: 402,
         container: qbBSave,
     },*/ {
+        name: "ZAP image",
+        hexHeader: "FD",
+        fileName: "ZAP.PIX",
+        fileSize: 21804,
+        imageStart: 12,
+        width: 320,
+        height: 68,
+    }, {
         name: "Robot robbery image",
         hexHeader: "FD",
         extension: "PIC",
