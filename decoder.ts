@@ -1,4 +1,4 @@
-import {currentDir, dStart, electron, files, inverted} from "./main.js"
+import {currentDir, electron, files} from "./main.js"
 import {formats, standardImageFormats} from "./formats.js"
 import {qbPalette} from "./qb_palette.js"
 import {isDigit, removeExtension} from "./functions.js"
@@ -176,14 +176,13 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
 
 
         let start = format.imageStart ?? 0
-        const layers = format.layers
         const items = []
         const itemFormat = format.container ?? format
+        let layers = undefined
         while(true) {
 
 
             // FORMAT CHECKING
-
 
             function getInt(index: number) {
                 return data[index] + 256 * data[index + 1]
@@ -196,11 +195,18 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             if(widthIndex !== undefined) {
                 if(widthIndex > dataLength - 2) break
                 width = getInt(start + widthIndex)
-                if(itemFormat.bSave) {
+            }
+
+            if(width === undefined || width <= 0) break
+
+            if(itemFormat.bSave) {
+                if(width % 8 !== 0) {
+                    layers = 4
+                } else {
                     width = width >> 3
-                    if(layers) width = width << 3
                 }
             }
+
 
             const heightIndex: number = itemFormat.heightIndex
             if(heightIndex !== undefined) {
@@ -213,12 +219,13 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
                 height = imageDataLength / width
             }
 
-            if(width === undefined || height === undefined || width <= 0 || height <= 0) break
+            if(height === undefined || height <= 0) break
+
 
             if(format.container) start += itemFormat.imageStart ?? 0
             let size = width * height
             if(layers) size = (size * layers) >> 3
-            if(start + size > dataLength) break
+            if(size <= 0 || start + size > dataLength) break
 
 
             // IMAGE DECODING AND DISPLAYING
@@ -231,14 +238,13 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
 
 
             if(layers) {
-                const byteWidth = 3
-                const layerSize = byteWidth * height
+                const byteWidth = (width + 7) >> 3
                 for(let y = 0; y < height; y++) {
                     for(let x = 0; x < byteWidth; x++) {
                         for(let bytePos = 0; bytePos < 8; bytePos++) {
                             let colorIndex = 0
                             for(let layer = 3; layer >= 0; layer--) {
-                                const dataPos = start + 4 + x + byteWidth * (layer + layers * y)
+                                const dataPos = start + x + byteWidth * (layer + layers * y)
                                 colorIndex = (colorIndex << 1) + ((data[dataPos] >> 7 - bytePos) & 1)
                             }
                             const color = palette[colorIndex]

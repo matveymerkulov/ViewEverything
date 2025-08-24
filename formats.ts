@@ -126,15 +126,6 @@ export let formats: any = [
         imageStart: 7,
         width: 64,
         height: 64,
-    }, {
-        name: "Secret of Cooey tile",
-        hexHeader: "FD",
-        extension: "TIL, MSK",
-        fileSize: 307,
-        imageStart: 7,
-        widthIndex: 0,
-        heightIndex: 2,
-        layers: 4,
     },
 
     // COMMON IMAGE TYPES
