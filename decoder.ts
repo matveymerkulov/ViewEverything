@@ -178,7 +178,8 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
         let start = format.imageStart ?? 0
         const items = []
         const itemFormat = format.container ?? format
-        let layers = undefined
+        let layers = format.layers
+        let canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D
         while(true) {
 
 
@@ -200,7 +201,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             if(width === undefined || width <= 0) break
 
             if(itemFormat.bSave) {
-                if(width % 8 !== 0) {
+                if(!layers && width % 8 !== 0) {
                     layers = 4
                 } else {
                     width = width >> 3
@@ -214,7 +215,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
                 height = getInt(start + heightIndex)
             }
 
-            const imageDataLength = dataLength - itemFormat.imageStart
+            let imageDataLength = dataLength - format.imageStart - (format.container ? itemFormat.imageStart : 0)
             if(itemFormat.determineHeight && (imageDataLength % width) === 0) {
                 height = imageDataLength / width
             }
@@ -227,14 +228,21 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             if(layers) size = (size * layers) >> 3
             if(size <= 0 || start + size > dataLength) break
 
+            if(!expand && items.length > 0) {
+                console.log(itemFormat.name)
+                file.thumbnail = canvas
+                file.hasMultipleImages = true
+                return
+            }
+
 
             // IMAGE DECODING AND DISPLAYING
 
 
-            const canvas = document.createElement("canvas")
+            canvas = document.createElement("canvas")
             canvas.width = width
             canvas.height = height
-            const ctx = canvas.getContext("2d")
+            ctx = canvas.getContext("2d")
 
 
             if(layers) {
@@ -261,12 +269,6 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
                         ctx.fillRect(x, y, 1, 1)
                     }
                 }
-            }
-
-            if(!expand) {
-                console.log(itemFormat.name)
-                file.thumbnail = canvas
-                return
             }
 
             items.push({name: items.length, thumbnail: canvas})

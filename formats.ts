@@ -104,6 +104,15 @@ export let formats: any = [
     // CUSTOM IMAGE TYPES
 
     {
+        name: "Aergere Andere 16 color image",
+        hexHeader: "FD",
+        extension: "BLD, ICO",
+        fileSize: 527,
+        imageStart: 11,
+        width: 32,
+        height: 32,
+        layers: 4,
+    }, {
         name: "Groov Buggies BSAVE VGA fullscreen image",
         hexHeader: "FD",
         fileSize: 64011,

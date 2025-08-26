@@ -5,7 +5,7 @@ export const electron = window["electron"]
 
 const NONE = -1
 
-export let currentDir = "D:/sync/content/zap"
+export let currentDir = "D:/sync/content"
 export let files = []
 
 const textHeight = 22
@@ -13,6 +13,7 @@ const fontSize = 16
 const backgroundColor = "gray"
 const thumbnailBorderColor = "white"
 const thumbnailBorderWidth = 2
+const thumbnailFolderBorder = 8
 
 let thumbnailsPerRow = 4
 let thumbnailsRatio = 200 / 320
@@ -20,10 +21,11 @@ let currentThumbnail = NONE
 
 let thumbnailTextColor = "black"
 let thumbnailWidth = 1, thumbnailHeight = 1
-let imageHeight = 1
+let imageWidth = 1, imageHeight = 1
 
 let folderImage: HTMLImageElement
 let parentFolderImage: HTMLImageElement
+let imagePackImage: HTMLImageElement
 
 let screenY = 0, maxScreenY = 0, scrollAmount = 50
 let viewingContainer = false
@@ -31,6 +33,7 @@ let viewingContainer = false
 document.addEventListener("DOMContentLoaded", () => {
     folderImage = document.getElementById("folder_image") as HTMLImageElement
     parentFolderImage = document.getElementById("parent_folder_image") as HTMLImageElement
+    imagePackImage = document.getElementById("image_pack_image") as HTMLImageElement
 
     const canvas = document.getElementById("canvas") as HTMLCanvasElement
     let ctx: CanvasRenderingContext2D
@@ -51,8 +54,9 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.textBaseline = "middle"
 
         thumbnailWidth = document.body.clientWidth / thumbnailsPerRow
-        imageHeight = thumbnailWidth * thumbnailsRatio
-        thumbnailHeight = imageHeight + textHeight + 2
+        imageWidth = thumbnailWidth - 2.0 * thumbnailBorderWidth
+        imageHeight = thumbnailWidth * thumbnailsRatio - 2.0 * thumbnailBorderWidth
+        thumbnailHeight = imageHeight + textHeight + 2.0 * thumbnailBorderWidth
 
         calculateFileListBounds()
     }
@@ -64,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let processingThumbnailNumber = 0
 
     function step() {
+
         let col = 0
         let y = -screenY
         ctx.fillStyle = backgroundColor
@@ -75,12 +80,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const img = file.isDirectory ? (file.thumbnail ?? folderImage) : file.thumbnail
             if(img !== undefined && img.width > 0 && img.height > 0) {
-                const scale = Math.min((thumbnailWidth - 3) / img.width, (imageHeight - 3) / img.height)
+                const scale = Math.min(imageWidth / img.width, imageHeight / img.height)
                 const imgWidth = scale * img.width
                 const imgHeight = scale * img.height
+                const imgX = x + thumbnailBorderWidth + 0.5 * (imageWidth - imgWidth)
+                const imgY = y + thumbnailBorderWidth + 0.5 * (imageHeight - imgHeight)
                 try {
-                    ctx.drawImage(img, x + 1 + 0.5 * (thumbnailWidth - imgWidth)
-                        , y + 1 + 0.5 * (imageHeight - imgHeight), imgWidth, imgHeight)
+                    ctx.drawImage(img, imgX, imgY, imgWidth, imgHeight)
+                    if(file.hasMultipleImages) {
+                        const folderPlaceWidth = 0.5 * imageWidth - thumbnailFolderBorder
+                        const folderPlaceHeight = 0.5 * imageHeight - thumbnailFolderBorder
+                        const folderScale = Math.max(folderPlaceWidth, folderPlaceHeight)
+                        const folderSize = folderPlaceWidth * folderPlaceHeight / folderScale
+                        ctx.drawImage(imagePackImage
+                            , x + thumbnailBorderWidth + imageWidth - thumbnailFolderBorder - folderSize
+                            , y + thumbnailBorderWidth + imageHeight - thumbnailFolderBorder - folderSize
+                            , folderSize, folderSize)
+                    }
                 } catch (e) {
                     console.error(e)
                 }
@@ -97,7 +113,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(ctx.measureText(text).width <= thumbnailWidth || text.length <= 3) break
                 text = text.substring(0, text.length - 4) + "..."
             }
-            ctx.fillText(text, x + 0.5 * thumbnailWidth, y + imageHeight + 0.5 * textHeight, thumbnailWidth - 6)
+            ctx.fillText(text, x + 0.5 * thumbnailWidth, y + imageHeight + 0.5 * textHeight
+                , thumbnailWidth - 2 * thumbnailBorderWidth)
 
             col++
             if(col === thumbnailsPerRow) {
