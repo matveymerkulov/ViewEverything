@@ -77,6 +77,13 @@ export let formats: any = [
         paletteStart: 7,
         paletteMultiplier: 4,
         paletteBytesPerColor: 4,
+    }, {
+        name: "PTW palette",
+        fileSize: 48,
+        extension: "PAL",
+        colorsQuantity: 16,
+        paletteStart: 0,
+        paletteMultiplier: 4,
     },
 
     // COMMON PALETTES

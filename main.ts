@@ -1,4 +1,4 @@
-import {currentPalette, decode} from "./decoder.js";
+import {currentPalette, decode, resetPalette} from "./decoder.js";
 import {inBounds, limit} from "./functions.js";
 
 export const electron = window["electron"]
@@ -189,6 +189,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if(event.code === "Backspace") {
             back()
             refreshThumbnails()
+        }
+        if(event.code === "Key_Q") {
+            resetPalette()
         }
     })
 

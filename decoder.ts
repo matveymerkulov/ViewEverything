@@ -7,6 +7,10 @@ export let currentPalette: number[][] = qbPalette()
 let imagePalette: number[][]
 
 
+export function resetPalette() {
+    currentPalette = qbPalette()
+}
+
 // DECODER
 
 
@@ -131,11 +135,12 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             const mul = format.paletteMultiplier ?? 1
             const indexMul = format.paletteBytesPerChannel ?? 1
             const colorMul = format.paletteBytesPerColor ?? 3
+            const colorsQuantity = format.colorsQuantity ?? 256
 
             palette = []
-            if(paletteStart + indexMul * (255 * colorMul + 3) > dataLength) continue
+            if(paletteStart + indexMul * ((colorsQuantity - 1) * colorMul + 3) > dataLength) continue
 
-            for(let colIndex = 0; colIndex < 256; colIndex++) {
+            for(let colIndex = 0; colIndex < colorsQuantity; colIndex++) {
                 palette[colIndex] = []
                 for (let colorLayer = 0; colorLayer < 3; colorLayer++) {
                     const i = paletteStart + (colorLayer + colIndex * colorMul) * indexMul
@@ -223,6 +228,12 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             if(height === undefined || height <= 0) break
 
 
+            if(imageDataLength === width * height * 4) {
+                layers = 4
+                width = width << 3
+            }
+
+
             if(format.container) start += itemFormat.imageStart ?? 0
             let size = width * height
             if(layers) size = (size * layers) >> 3
@@ -255,6 +266,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
                                 const dataPos = start + x + byteWidth * (layer + layers * y)
                                 colorIndex = (colorIndex << 1) + ((data[dataPos] >> 7 - bytePos) & 1)
                             }
+                            if(palette.length <= colorIndex) continue
                             const color = palette[colorIndex]
                             ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
                             ctx.fillRect(bytePos + 8 * x, y, 1, 1)
@@ -264,7 +276,9 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             } else {
                 for(let y = 0; y < height; y++) {
                     for(let x = 0; x < width; x++) {
-                        const color = palette[data[start + x + width * y]]
+                        let colorIndex = data[start + x + width * y]
+                        if(palette.length <= colorIndex) continue
+                        const color = palette[colorIndex]
                         ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
                         ctx.fillRect(x, y, 1, 1)
                     }
@@ -289,7 +303,9 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
 
                 for(let y = 0; y < 16; y++) {
                     for(let x = 0; x < 16; x++) {
-                        let color = palette[x + 16 * y]
+                        let colorIndex = x + 16 * y
+                        if(palette.length <= colorIndex) continue
+                        let color = palette[colorIndex]
                         ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
                         ctx.fillRect(x * 16, y * 16, 16, 16)
                     }
