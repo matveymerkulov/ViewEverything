@@ -90,7 +90,6 @@ export let formats: any = [
 
     {
         name: "Binary VGA palette",
-        extension: "PAL",
         fileSize: 768,
         paletteStart: 0,
         paletteMultiplier: 4,
@@ -113,7 +112,7 @@ export let formats: any = [
     {
         name: "Aergere Andere 16 color image",
         hexHeader: "FD",
-        extension: "BLD, ICO",
+        extension: ["BLD", "IKO"],
         fileSize: 527,
         imageStart: 11,
         width: 32,
@@ -129,7 +128,7 @@ export let formats: any = [
     }, {
         name: "Power of love container",
         hexHeader: "FD",
-        fileName: "SPRITES.DAT, SPRTMASK.DAT",
+        fileName: ["SPRITES.DAT", "SPRTMASK.DAT"],
         fileSize: 1327,
         imageStart: 7,
         fixedShift: 116,
@@ -142,6 +141,13 @@ export let formats: any = [
         imageStart: 7,
         width: 64,
         height: 64,
+    }, {
+        name: "Cyclone sprite",
+        extension: "TMP",
+        widthIndex: 0,
+        heightIndex: 1,
+        imageStart: 3,
+        type: "numbers",
     },
 
     // COMMON IMAGE TYPES

@@ -1,7 +1,7 @@
 import {currentDir, electron, files} from "./main.js"
 import {formats, standardImageFormats} from "./formats.js"
 import {qbPalette} from "./qb_palette.js"
-import {isDigit, removeExtension} from "./functions.js"
+import {getExtension, isDigit, removeExtension, stringsAreEqual} from "./functions.js"
 
 export let currentPalette: number[][] = qbPalette()
 let imagePalette: number[][]
@@ -18,6 +18,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
     if(getPalette) imagePalette = undefined
 
     const fullFileName = `${currentDir}/${file.name}`
+    const fileNameWithoutExtension = removeExtension(file.name)
     const byteArray: Uint8Array = electron.getData(fullFileName)
 
 
@@ -74,7 +75,8 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             break
         } else if(num >= 128) {
             numbers = englishText = false
-        } else if(num < 32 || num > 64) {
+        } else if(num < 48 || num >= 58) {
+            if(num === 32) continue
             numbers = false
         }
     }
@@ -124,6 +126,9 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
 
         checkHeader(format)
 
+        if(!stringsAreEqual(format.fileName, file.name)) continue
+        if(!stringsAreEqual(format.extension, getExtension(file.name))) continue
+
 
         // PALETTE DECODING
 
@@ -165,7 +170,6 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
 
 
         if(paletteStart === undefined) {
-            const fileNameWithoutExtension = removeExtension(file.name)
             for(const file of files) {
                 if(file.isDirectory) continue
                 if(removeExtension(file.name) !== fileNameWithoutExtension) continue
@@ -189,6 +193,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
 
 
             // FORMAT CHECKING
+
 
             function getInt(index: number) {
                 return data[index] + 256 * data[index + 1]
