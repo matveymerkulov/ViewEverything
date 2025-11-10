@@ -143,11 +143,12 @@ export let formats: any = [
         height: 64,
     }, {
         name: "Cyclone sprite",
-        extension: "TMP",
-        widthIndex: 0,
-        heightIndex: 1,
-        imageStart: 3,
         type: "numbers",
+        extension: "SPR",
+        imageStart: 6,
+        widthIndex: 2,
+        heightIndex: 4,
+        convertToBinary: true
     },
 
     // COMMON IMAGE TYPES

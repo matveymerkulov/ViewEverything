@@ -75,8 +75,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             break
         } else if(num >= 128) {
             numbers = englishText = false
-        } else if(num < 48 || num >= 58) {
-            if(num === 32) continue
+        } else if(num >= 64) {
             numbers = false
         }
     }
@@ -128,6 +127,17 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
 
         if(!stringsAreEqual(format.fileName, file.name)) continue
         if(!stringsAreEqual(format.extension, getExtension(file.name))) continue
+
+        if(format.convertToBinary) {
+            const newData = []
+            for(let index = 0; index < data.length; index++) {
+                let dataIndex = data[index]
+                if(dataIndex < 0) dataIndex +=65536
+                newData.push(dataIndex & 0xFF)
+                newData.push(dataIndex >> 8)
+            }
+            data = newData
+        }
 
 
         // PALETTE DECODING
@@ -205,7 +215,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             const widthIndex: number = itemFormat.widthIndex
             if(widthIndex !== undefined) {
                 if(widthIndex > dataLength - 2) break
-                width = getInt(start + widthIndex)
+                width = getInt(widthIndex)
             }
 
             if(width === undefined || width <= 0) break
@@ -222,7 +232,7 @@ export function decode(file: any, usePalette = false, getPalette = false, expand
             const heightIndex: number = itemFormat.heightIndex
             if(heightIndex !== undefined) {
                 if(heightIndex > dataLength - 2) break
-                height = getInt(start + heightIndex)
+                height = getInt(heightIndex)
             }
 
             let imageDataLength = dataLength - format.imageStart - (format.container ? itemFormat.imageStart : 0)
